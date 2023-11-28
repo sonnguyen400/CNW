@@ -36,7 +36,6 @@ create table question(
 create table answer(
 	id int primary key auto_increment,
     ques_id int,
-    pos int,
     ans text,
     isTrue bool,
     foreign key (ques_id) references question(id)

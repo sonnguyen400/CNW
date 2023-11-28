@@ -35,7 +35,7 @@
                     }
                 ?>
             </p>
-			<a href="#" class="btn btn-primary">Trở lại</a>
+            <a href="./bien_tap.php<?php echo"?courseId=$_GET[courseId]"?>" class="btn btn-primary">Trở lại</a>
             <form action="" method="POST" enctype="multipart/form-data">
 			</div>
             <div style="margin: 20px 13%;">
@@ -57,38 +57,25 @@
                 <?php
 
                     if(isset($_POST["btn"])){
-                        
                         $ten_cau_hoi=trim($_POST["ten_cau_hoi"]);
                         $dang_cau_hoi=trim($_POST["dang_cau_hoi"]);
                         $da=trim($_POST["da"]);
                         if(strlen($ten_cau_hoi)==0||strlen($dang_cau_hoi)==0||strlen($da)==0){
-                            echo  '<div class="alert alert-warning text-center" role="alert">Thêm câu hỏi thất bại</div>';
+                            echo  errorMessage("Thêm câu hỏi thất bại");
                         }else{
-                            $insertQues="insert into question(user_id,course_id,ques_type,ques) 
-                                                        value('$_SESSION[userid]','$_GET[courseId]','$dang_cau_hoi', '$ten_cau_hoi')";
-                            if( mysqli_query($conn,$insertQues)){
-                                $quesId = mysqli_insert_id($conn);
-                                $insertAnswer="insert into answer(ques_id,ans) value('$quesId' ,'$da')";
-                                mysqli_query($conn,$insertAnswer);
-                                if(isset($_FILES["file_tai_len"])&&$_FILES["file_tai_len"]['error']==0){
-                                    $file=$_FILES["file_tai_len"];
-                                    $ex=pathinfo($file['name'],PATHINFO_EXTENSION);
-                                    move_uploaded_file($file["tmp_name"],"../images/1.$ex");
-                                    $update="update question set imgpath='../images/1.$ex' where id=$quesId ";
-                                    mysqli_query($conn,$update);
-                                }
-                                echo '<div class="alert alert-success text-center" role="alert">Thêm câu hỏi thành công</div>';
-                            };
-                            
+                            $insertQues=insertQues($_SESSION["userid"],$_GET["courseId"],$dang_cau_hoi,$ten_cau_hoi,$_FILES["file_tai_len"]);
+                            if($insertQues['id']!=false){
+                                if( insertAns($insertQues['id'],$da,true)!=false)
+                                    echo successMessage("Thêm câu hỏi thành công");
+                            };  
                         }
                     }
-                        
-                    ?>
+                ?>
                 
                 <div style="margin: 20px 0 0 0;" class="d-grid">
                     <input class="btn btn-primary btn-block" name="btn" type="submit" value="Thêm câu hỏi">
                 </div>
-               
+
             </div>
             </form>
 		
