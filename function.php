@@ -23,13 +23,6 @@
             header("Location:"."../src/khoa_hoc.php");
         }
 	}
-    
-
-    
-    
-
-
-
     // end checkLogin
 
 
@@ -180,14 +173,6 @@
     function duyetCauhoi($questionId) {
         update("question","state","Đã duyệt","id=$questionId");
     }
-
-
-
-
-
-
-
-
     ////Utils
     function errorMessage($errMessage){
         return "<div class='alert alert-warning text-center' role='alert'>".(isset($errMessage)?$errMessage:"Thao tác hất bại")."</div>";
