@@ -19,6 +19,7 @@
         }else{
             $user=mysqli_fetch_assoc($result);
             $_SESSION["userid"]=$user['id'];
+            $_SESSION["role"]=$user['role'];
             header("Location:"."../src/khoa_hoc.php");
         }
 	}
@@ -66,6 +67,33 @@
         }
         return false;
     }
+    function deleteById($tablename,$id){
+        global $conn;
+        $query="delete from $tablename where id=$id";
+        if(mysqli_query($conn,$query)){
+            return true;
+        }
+        return false;
+    }
+
+    function getByPredicate($tablename,$predicate){
+        global $conn;
+        $query="select * from $tablename where $predicate";
+        $result=mysqli_query($conn,$query);
+        if($result) return $result;
+        return false;
+    }
+
+    function getById($tablename,$id){
+        $result=getByPredicate($tablename,"id=$id");
+        if($result) return mysqli_fetch_assoc($result);
+        return false;
+    }
+    
+    //User Service
+    function getUserById($user_id){
+        return getById("user",$user_id);
+    }
     //Answer Service
     function insertAns($quesId,$ans,$isTrue){
         global $conn;
@@ -77,9 +105,16 @@
         return insert("answer",$object);
     }
     function getAnsByQuesId($quesId){
-        
+        $result= getByPredicate("Answer","ques_id=$quesId");
+        $arr=Array();
+        while($row=mysqli_fetch_assoc($result)){
+            array_push($arr,$row);
+        }
+        return $arr;
     }
+    
     //Question Service
+    const GET_ANSWER=1;
     function insertQues($user_id,$course_id,$quesType,$ques,$file){
         global $conn;
         $object=Array(
@@ -103,6 +138,51 @@
         );
     }
 
+    function getQuestionById($id,$getAnswer=0){
+        $question=getById("Question",$id);
+        if($question!=false){
+            $answers=getAnsByQuesId($question["id"]);
+            $user=getUserById($question['user_id']);
+            $question["ans"]=$answers;
+            $question["user"]=$user;
+            return $question;
+        }
+        return false;
+    }
+    function getAllQuestionByCourseId($courseId,$user_id=false) {
+        $predicate="course_id=$courseId";
+        $user=getUserById($user_id);
+        if($user['role']!="ADMIN"){
+            $predicate=$predicate." and user_id=$user_id";
+        }
+        $question=getByPredicate("Question",$predicate);
+        $arr=Array();
+        while($row=mysqli_fetch_assoc($question)){
+            $answers=getAnsByQuesId($row["id"]);
+            $user=getUserById($row['user_id']);
+            $row["ans"]=$answers;
+            $row["user"]=$user;
+            array_push($arr,$row);
+        }
+        return $arr;
+    }
+    function deleteQuestionById($questionId){
+        $question=getQuestionById($questionId);
+        foreach ($question['ans'] as $key => $ans) {
+            deleteById("answer",$ans['id']);
+        }
+        if(isset($question['imgpath'])&&file_exists($question['imgpath'])){
+            unlink($question['imgpath']);
+        }
+        
+        deleteById("question",$questionId);
+    }
+    function duyetCauhoi($questionId) {
+        update("question","state","Đã duyệt","id=$questionId");
+    }
+
+
+
 
 
 
@@ -124,6 +204,12 @@
             return $path;
         }
         return false;
+    }
+    //print_arr
+    function print_arr($arr){
+        echo "<pre>";
+        print_r($arr);
+        echo "</pre>";
     }
 ?>
 

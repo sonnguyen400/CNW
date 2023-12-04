@@ -19,7 +19,7 @@
 </head>
 <body>
     <?php 
-        // include 'navbar.php';
+        include 'navbar.php';
     ?>
 	<main style="min-height: 100vh; max-width: 100%;">
 			<div id="action" style="margin: 20px 0 0 13%;">
