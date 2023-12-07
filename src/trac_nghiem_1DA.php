@@ -13,14 +13,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Thêm câu hỏi</title>
 	<!-- Begin bootstrap cdn -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="	sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 	<!-- End bootstrap cdn -->
 
 </head>
 <body>
     <?php 
-        // include 'navbar.php';
+        include 'navbar.php';
     ?>
 	<main style="min-height: 100vh; max-width: 100%;">
 			<div id="action" style="margin: 20px 0 0 13%;">
@@ -37,7 +37,7 @@
                 ?>
             </p>
 			<a href="./bien_tap.php<?php echo"?courseId=$_GET[courseId]"?>" class="btn btn-primary">Trở lại</a>
-            <form action="./trac_nghiem.php<?php echo"?courseId=$_GET[courseId]"?>" method="POST" enctype="multipart/form-data">
+            <form action="./trac_nghiem_1DA.php<?php echo"?courseId=$_GET[courseId]"?>" method="POST" enctype="multipart/form-data">
 			</div>
             <div style="margin: 20px 13%;">
                 <div class="form-group">
@@ -50,22 +50,12 @@
                 </div>
                 <div class="form-group">
                     <label for="name_quiz">Dạng câu hỏi</label>
-                    <input class="form-control" value="Trắc nghiệm" readonly  type="text" name="dang_cau_hoi" id="">
+                    <input class="form-control" value="<?php echo TRAC_NGHIEM_1DA?>" readonly  type="text" name="dang_cau_hoi" id="">
                 </div>
-                <div class="form-group">
-                    <label for="Ops"><span style="color: red;">*</span>Nhập số lượng đáp án</label>
-                    <input class="form-control"  type="number" min='4' max='10' value="<?php if(isset($_POST["createDa"])&&isset($_POST["cautralois"])){ echo $_POST["Ops"]<4?4:$_POST["Ops"];}else echo 4?>" name="Ops" id="">
-                    <button name="createOps" class="btn-primary btn" style="margin-top: 10px">Tạo thêm Option</button>
-                </div>
-                <?php 
-                     for($i=0;$i<$defaultValue;$i++){
-                        
-                     }
-                ?>
                 <div class="form-group">
                     <label for="name_quiz"><span style="color: red;">*</span>Nhập số lượng đáp án</label>
                     <input class="form-control"  type="number" min='4' max='10' value="<?php if(isset($_POST["createDa"])&&isset($_POST["cautralois"])){ echo $_POST["cautralois"]<4?4:$_POST["cautralois"];}else echo 4?>" name="cautralois" id="">
-                    <button name="createDa" class="btn-primary btn" style="margin-top: 10px">Tạo đáp án</button>
+                        <button name="createDa" class="btn-primary btn" style="margin-top: 10px">Tạo đáp án</button>
                 </div>
                 <?php
                     $defaultValue=4;
@@ -74,15 +64,16 @@
                     }
                     $isValid=true;
                     for($i=0;$i<$defaultValue;$i++){
-                        $isChecked=isset($_POST["check$i"])?"checked":"";
+                        $isChecked=isset($_POST["check"])&&$_POST["check"]==$i?"checked":"";
                         $validField=true;
                         if(isset($_POST["da$i"])&&trim($_POST["da$i"])==""){
                             $isValid=$validField=false;
                         }
-                        echo "<div style='margin: 20px 0 0 0;' class='input-group mb-3'>  
+                        echo "<div style='margin: 20px 0 0 0;' class='input-group mb-3'>   
+                                <input type='radio' name='check' value='$i' ".($isChecked).">
                                 <input name='da$i' type='text' value='".(isset($_POST["da$i"])?$_POST["da$i"]:"")."' class='form-control'  placeholder='Nhập đáp án'>
                             </div>
-                            ".($validField?"":"<small>Không thể bỏ trống</small>");
+                            ".($validField?"":"<small>Không thể bỏ trống</small>"); 
                     }
                 ?>
                 <div style="margin: 20px 0 0 0;" class="d-grid">
@@ -92,22 +83,29 @@
                 <?php
                     if(isset($_POST["btn"])){
                         $ten_cau_hoi=trim($_POST["ten_cau_hoi"]);
-                        $dang_cau_hoi=trim($_POST["dang_cau_hoi"]);
+                        $dang_cau_hoi=$_POST["dang_cau_hoi"];
                         $das=Array();
+                        $count=0;
                         for($i=0;$i<$defaultValue;$i++){
                             if(isset($_POST["da$i"])){
+                                $isChecked=isset($_POST["check"])&&$i==$_POST["check"];
+                                $count+=$isChecked?1:0;
                                 $da=Array(
                                     "ans"=>$_POST["da$i"],
-                                    "isTrue"=>isset($_POST["check$i"])?true:false
+                                    "isTrue"=>$isChecked
                                 );
                                 array_push($das,$da);
                                 
                             }
                         }
+                        if($count==0) {
+                            $isValid=false;
+                            echo errorMessage("Câu hỏi phải có ít nhất một đáp áp đúng");
+                        }
                         if(strlen($ten_cau_hoi)==0||!$isValid){
                             echo  errorMessage("Thêm câu hỏi thất bại");
                         }else{
-                            $insertQues=insertQues($_SESSION["userid"],$_GET["courseId"],$dang_cau_hoi,$ten_cau_hoi,$_FILES["file_tai_len"]);
+                            $insertQues=insertQues($_SESSION["userid"],$_GET["courseId"],$dang_cau_hoi,$ten_cau_hoi,$_FILES["file_tai_len"], $_SESSION["role"]==ADMIN?DA_DUYET:CHUA_DUYET);
                             if($insertQues['id']!=false){
                                 foreach ($das as $key => $da) {
                                     insertAns($insertQues['id'],$da["ans"],$da["isTrue"]);

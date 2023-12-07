@@ -1,7 +1,7 @@
 <?php 
 	include 'function.php';
     if(isLogin()){
-        header("Location: ./src/dangnhap.php");
+        header("Location: ./src/dang_nhap.php");
     }else{
         header("Location: ./src/khoa_hoc.php");
     }

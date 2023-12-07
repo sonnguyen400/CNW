@@ -10,6 +10,9 @@
     if(isset($_POST['duyet'])){
         duyetCauhoi($_POST['duyet']);
     }
+    if(isset($_POST['view'])){
+        header("Location: ./xem_truoc.php?quesId=$_POST[view]&courseId=$_GET[courseId]");
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,8 +21,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Biên tập</title>
 	<!-- Begin bootstrap cdn -->
-	<link href="../css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-	<script src="../js/bootstrap.bundle.min.js" integrity="	sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 	<!-- End bootstrap cdn -->
     <style>
         img{
@@ -47,6 +50,7 @@
         <div id="action" style="margin: 20px 0 0 13%;">
             <p class="h3">
                 <!--Tên khóa học  -->
+                Khóa học: 
                 <?php
                     if(isset($_GET["courseId"])){
                         $query="Select * from course where id=$_GET[courseId]";
@@ -65,8 +69,8 @@
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="./them_cau_hoi.php<?php echo "?courseId=$_GET[courseId]" ?>" >Câu hỏi điền</a></li>
-                <li><a class="dropdown-item" href="./trac_nghiem.php<?php echo "?courseId=$_GET[courseId]" ?>">Câu hỏi trắc nghiệm</a></li>
-                <li><a class="dropdown-item" href="./them_cau_hoi.php<?php echo "?courseId=$_GET[courseId]" ?>" >Câu hỏi sắp xếp</a></li>
+                <li><a class="dropdown-item" href="./trac_nghiem.php<?php echo "?courseId=$_GET[courseId]" ?>">Trắc nghiệm nhiều đáp án</a></li>
+                <li><a class="dropdown-item" href="./trac_nghiem_1DA.php<?php echo "?courseId=$_GET[courseId]" ?>">Trắc nghiệm một đáp án</a></li>
             </ul>
            
         </div>
@@ -87,8 +91,8 @@
                         function actionRender($question){
                             $action="";
                             $action=$action."<button name='view' value='$question[id]' class='btn btn-primary'>Xem trước</button>";
-                            if($_SESSION['role']=="ADMIN"){
-                                if($question['state']=="Chưa duyệt"){
+                            if($_SESSION['role']==ADMIN){
+                                if($question['state']==CHUA_DUYET){
                                     $action=$action."<button name='duyet' value='$question[id]' class='btn btn-success'>Duyệt</button>";
                                 }
                                 $action=$action."<button name='delete' value='$question[id]' class='btn btn-danger'>Xóa</button>";
@@ -99,14 +103,14 @@
                         
                         for ($i=0; $i <count($questions) ; $i++) { 
                             $answers=Array();
-                            foreach ($questions[$i]['ans'] as $key => $answer) {
+                            foreach ($questions[$i]['answer'] as $key => $answer) {
                                 if($answer['isTrue']) array_push($answers,$answer);
                             }
                             echo "<tr>
                                     <th>$i</th>
-                                    <th>".$questions[$i]['ques']."</th>
-                                    <th>".$questions[$i]['ques_type']."</th>
-                                    <th>".join(" ",array_map(function($ans){return "<p>$ans[ans]</p>"; },$answers))."</th>
+                                    <th>".$questions[$i]['content']."</th>
+                                    <th>".$questions[$i]['question_type']."</th>
+                                    <th>".join(" ",array_map(function($answer){return "<p>$answer[content]</p>"; },$answers))."</th>
                                     <th>".$questions[$i]['user']['userName']."</th>
                                     <th>".$questions[$i]['state']."</th>
                                     <th>".actionRender($questions[$i])."</th> 

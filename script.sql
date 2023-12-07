@@ -1,6 +1,6 @@
--- Tai khoan user:  tk1 	pass: 123456
--- Tai khoan admin: tk2    	pass: 123   
-CREATE DATABASE  IF NOT EXISTS `project_k71` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+-- Tk admin: tk2 mk: 123
+-- Tk user: tk1 mk:123456
+CREATE DATABASE  IF NOT EXISTS `project_k71`  ;
 USE `project_k71`;
 -- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
 --
@@ -28,14 +28,14 @@ DROP TABLE IF EXISTS `answer`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `answer` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ques_id` int(11) DEFAULT NULL,
-  `ans` text DEFAULT NULL,
+  `question_id` int(11) DEFAULT NULL,
+  `content` text DEFAULT NULL,
   `isTrue` tinyint(1) DEFAULT NULL,
   `pos` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `ques_id` (`ques_id`),
-  CONSTRAINT `answer_ibfk_1` FOREIGN KEY (`ques_id`) REFERENCES `question` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `question_id` (`question_id`),
+  CONSTRAINT `answer_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,7 +44,7 @@ CREATE TABLE `answer` (
 
 LOCK TABLES `answer` WRITE;
 /*!40000 ALTER TABLE `answer` DISABLE KEYS */;
-INSERT INTO `answer` VALUES (2,2,'Đáp án cho câu hỏi tài khoản 3',1,NULL),(3,3,'Đáp án trắc nghiệm 1',1,NULL),(4,3,'Đáp án trắc nghiệm 2',0,NULL),(5,3,'Đáp án trắc nghiệm 3',1,NULL),(6,3,'Đáp án trắc nghiệm 4',0,NULL),(11,5,'Da 1',1,NULL),(12,5,'Da 2',0,NULL),(13,5,'Da 3',1,NULL),(14,5,'Da 4',0,NULL);
+INSERT INTO `answer` VALUES (1,1,'Dap an 1',1,NULL),(2,2,'Da 1',1,NULL),(3,2,'Da 2',0,NULL),(4,2,'Da 3',1,NULL),(5,2,'Da 4',0,NULL),(6,2,'Da 5',0,NULL),(7,3,'Dap  1',0,NULL),(8,3,'DAp 2',1,NULL),(9,3,'Dap 3',0,NULL),(10,3,'Dap 4',0,NULL),(11,4,'Dap an 10',1,NULL),(12,5,'Dap an 2',1,NULL),(13,5,'Dap an 3',0,NULL),(14,5,'DAp an 4',0,NULL),(15,5,'Dap an 5',1,NULL),(16,6,'Dien 20',1,NULL);
 /*!40000 ALTER TABLE `answer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,8 +110,8 @@ CREATE TABLE `question` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `course_id` int(11) NOT NULL,
-  `ques_type` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
-  `ques` text DEFAULT NULL,
+  `question_type` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `content` text DEFAULT NULL,
   `imgpath` varchar(255) DEFAULT NULL,
   `state` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT 'Chưa duyệt',
   PRIMARY KEY (`id`),
@@ -119,7 +119,7 @@ CREATE TABLE `question` (
   KEY `course_id` (`course_id`),
   CONSTRAINT `question_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `question_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -128,7 +128,7 @@ CREATE TABLE `question` (
 
 LOCK TABLES `question` WRITE;
 /*!40000 ALTER TABLE `question` DISABLE KEYS */;
-INSERT INTO `question` VALUES (2,3,1,'Điền','Câu hỏi cho tk3','../images/2.jpg','Đã duyệt'),(3,2,1,'Trắc nghiệm','Câu hỏi trắc nghiệm','../images/3.jpg','Chưa duyệt'),(5,1,1,'Trắc nghiệm','Câu hỏi trắc nghiệm tk1','../images/5.webp','Đã duyệt');
+INSERT INTO `question` VALUES (1,2,1,'Câu hỏi điền','CAu hoi 1',NULL,'Đã duyệt'),(2,2,1,'Trắc nghiệm nhiều đáp án','Cau trac nghiem 1','../images/2.png','Đã duyệt'),(3,2,1,'Trắc nghiệm 1 đáp án','Cau hoi 3','../images/3.png','Đã duyệt'),(4,1,1,'Câu hỏi điền','Cau hoi dien 10','../images/4.png','Chưa duyệt'),(5,1,1,'Trắc nghiệm nhiều đáp án','TRac nghiem n 10',NULL,'Đã duyệt'),(6,1,1,'Câu hỏi điền','Cau hoi dien 20',NULL,'Đã duyệt');
 /*!40000 ALTER TABLE `question` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -173,4 +173,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-11-30 16:40:31
+-- Dump completed on 2023-12-07 17:42:00
