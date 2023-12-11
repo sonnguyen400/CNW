@@ -2,7 +2,7 @@
     include '../function.php';
     If(isset($_POST['submitLogin'])){
         if(checkLogin($_POST['username'],$_POST['password'])){
-            header("Location:"."../src/khoa_hoc.php");
+            header("Location:"."../src/index.php");
         }
     }
 ?>
