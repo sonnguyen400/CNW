@@ -6,16 +6,11 @@
     }
     $editMode=isset($_POST["edit"]);
     if(isset($_GET["quesId"])){
-        if(isset($_SESSION['editing_question'])){
-            $question=$_SESSION['editing_question'];
-        }
-        if(!isset($_SESSION['editing_question']) || $_GET["quesId"]!= $question['id']){
-            $_SESSION['editing_question']=getQuestionById($_GET["quesId"]);
-            $question=$_SESSION['editing_question'];
-        }
+        $question=getQuestionById($_GET["quesId"]);
     }
     if(isset($_POST['xoaanh'])){
         $editMode=true;
+        $question['imgpath']="";
         unlink($_POST['xoaanh']);
     }
     if(isset($_POST['duyet'])){
@@ -27,16 +22,18 @@
         deleteQuestionById($_GET['quesId']);
         header("Location: ./bien_tap.php?courseId=$_GET(courseId)");
     }
+
+
+    //Logic sửa Câu hỏi
     if(isset($_POST["confirm"])){
-        $question['content']=$_POST['question_content'];
-        if(isset($_FILES['question_img'])&&$_FILES['question_img']!=""){
+       //Image edit
+        if(file_exists($_FILES['question_img']['tmp_name']) &&is_uploaded_file($_FILES['question_img']['tmp_name'])){
             if(file_exists($question['imgpath'])) unlink($question['imgpath']);
             $fileUp=createFile($_FILES['question_img'],$question['id']);
-        }
-       
-        if($fileUp){
             $question['imgpath']=$fileUp;
         }
+
+        $question['content']=$_POST['question_content'];
         if($question['question_type']==CAUHOI_DIEN){
             $question['answer'][0]['content']=$_POST["da"];
         }else if($question['question_type']==TRAC_NGHIEM_1DA){
@@ -50,12 +47,13 @@
                 $question['answer'][$i]['isTrue']=isset($_POST["check$i"])?1:0;
             }
         }
-        $isValid=updateQuesionById($question['id'],$question['content']);
+        $isValid=updateQuesionById($question['id'],$question['content'],$question['imgpath']);
         foreach ($question['answer'] as $key => $answer) {
             $isValid=updateAnswerById($answer['id'],$answer['content'],$answer["isTrue"]?1:0);
         }
         if($isValid){
             echo successMessage("Update thành công câu hỏi");
+            header("Refresh: 3;");
         }else{
             echo errorMessage("Thao tác cập nhật thất bại");
         }

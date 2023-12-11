@@ -37,6 +37,7 @@
                                 <div class='card-body'>
                                 <h5 class='card-title'>$row[name]</h5>
                                 <a class='btn btn-primary' href='./bien_tap.php?courseId=$row[id]'>Truy cập</a>
+                                <a class='btn btn-primary' href='./test.php?courseId=$row[id]'>Kiểm tra</a>
                                 </div>
                             </div>
                         </div>";

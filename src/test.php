@@ -4,6 +4,8 @@
     if(!isLogin()){
         header("Location: "."./dang_nhap.php");
     }
+    $questions=getRandomQuestion(6,$_GET['courseId'],"state='".DA_DUYET."'");
+    $_SESSION['questions']=$questions;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,7 +31,15 @@
         .action-btns button{
             margin-right: 5px;
         }
-
+        
+        input:read-only{
+            border: none !important;
+            outline: none !important;
+        }
+        input[type='checkbox'],
+        input[type='radio']{
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -39,33 +49,31 @@
 	<main style="min-height: 100vh; max-width: 100%;">
 			
         <div id="action" style="margin: 20px 0 0 13%;">
-            <form action="" method="post">
+            <form action="./score.php<?php echo "?courseId=$_GET[courseId]"?>" method="post">
                 <?php
-                    // $questions=getRandomQuestion(5,1);
-                    // print_r($questions);
-                    // foreach ($questions as $key => $question) {
-                    //     switch ($variable) {
-                    //         case CAUHOI_DIEN:
-                    //             echo CauHoiDien($question,$key);
-                    //             break;
-                    //         case TRAC_NGHIEM_1DA:
-                    //             echo TracNghiem1Da($question,$key);
-                    //             break;
-                    //         case TRAC_NGHIEM_nDA:
-                    //             echo TracNghiemnDa($question,$key);
-                    //             break;
-                    //         default:
-                    //             # code...
-                    //             break;
-                    //     }
-                    // }
+                    foreach ($questions as $key => $question) {
+                        switch ($question['question_type']) {
+                            case CAUHOI_DIEN:
+                                echo CauHoiDien($question,$key+1);
+                                break;
+                            case TRAC_NGHIEM_1DA:
+                                echo TracNghiem1Da($question,$key+1);
+                                break;
+                            case TRAC_NGHIEM_nDA:
+                                echo TracNghiemnDa($question,$key+1);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 ?>
+                <button type="submit" name="submit" value="submit" class="btn btn-success">Gửi</button>
             </form>
            
         </div>
 	</main>
     <?php 
-        // include 'footer.php'; 
+        include 'footer.php'; 
     ?>
 </body>
 

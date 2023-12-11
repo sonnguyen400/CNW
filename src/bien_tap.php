@@ -38,7 +38,15 @@
         .action-btns button{
             margin-right: 5px;
         }
-
+        
+        input:read-only{
+            border: none !important;
+            outline: none !important;
+        }
+        input[type='checkbox'],
+        input[type='radio']{
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -53,11 +61,8 @@
                 Khóa học: 
                 <?php
                     if(isset($_GET["courseId"])){
-                        $query="Select * from course where id=$_GET[courseId]";
-                        $result=mysqli_query($conn,$query);
-                        while($row=mysqli_fetch_assoc($result)){
-                            print_r($row['name']);
-                        }
+                        $course=getCourseById($_GET["courseId"]);
+                        print_r($course['name']);
                     }
                 ?>
                 

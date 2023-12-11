@@ -11,8 +11,7 @@
     const CHUA_DUYET="Chưa duyệt";
     const DA_DUYET="Đã duyệt";
 
-
-
+    
 
     // Begin Login function
     
@@ -43,7 +42,7 @@
     //Component
     function input($type,$name,$value,...$properties){
         $properties=join(" ",$properties);
-        return "<input name='$name' type='$type' value='$value' $properties/>";
+        return "<input name='$name' type='$type' value='$value' $properties>";
     }
     function button($type,$name,$value,$children,...$properties){
         $properties=join(" ",$properties);
@@ -54,7 +53,7 @@
     //General Service
     function update($tablename,$property,$value,$predicate){
         global $conn;
-        $updateQuery="update $tablename set $property='$value' where $predicate";
+        $updateQuery="update $tablename set $property=$value where $predicate";
         return mysqli_query($conn,$updateQuery);
     }
     function updateAll($tablename,$keyValue,$predicate){
@@ -94,20 +93,40 @@
         return false;
     }
 
-    function getByPredicate($tablename,$predicate){
+    function get($tablename,...$predicate){
         global $conn;
-        $query="select * from $tablename where $predicate";
+        if(count($predicate)!=0){
+            $predicate=" where ".join(" and ",$predicate);
+        }else  $predicate=" ";
+        $query="select * from $tablename $predicate";
         $result=mysqli_query($conn,$query);
         if($result) return $result;
         return false;
     }
+    function getPagination($tablename,$predicate,$orderBy,$order,...$limit){
+        global $conn;
+        if(count($predicate)!=0)   $predicate=" where ".join(" and ",$predicate);
+        if(count($predicate)!=0)   $orderBy=" where ".join(" , ",$orderBy);
+        if($order=="ASC"||$order=="DESC") $orderBy=$orderBy." $order ";
+        if(count($limit)!=0) $limit=" limit ".join(",",$limit);
+        $query="Select * from $tablename $predicate $orderBy $limit";
+        $result=mysqli_query($conn,$query);
+        if($result) return $result;
+        return false;
+
+    }
 
     function getById($tablename,$id){
-        $result=getByPredicate($tablename,"id=$id");
+        $result=get($tablename,"id=$id");
         if($result) return mysqli_fetch_assoc($result);
         return false;
     }
-    
+    //Course Service
+    function getCourseById($id){
+        $result=get("course","id=$id");
+        if($result) return mysqli_fetch_assoc($result);
+        return false;
+    }
     //User Service
     function getUserById($user_id){
         $user=getById("user",$user_id);
@@ -124,7 +143,7 @@
         return insert("answer",$object);
     }
     function getAnsByQuesId($quesId){
-        $result= getByPredicate("Answer","question_id=$quesId");
+        $result= get("Answer","question_id=$quesId");
         $arr=Array();
         while($row=mysqli_fetch_assoc($result)){
             array_push($arr,$row);
@@ -157,7 +176,7 @@
         if($id!=false&&isset($file)){
             $fileok=createFile($file,$id);
             if($fileok!=false){
-                update("question","imgpath",$fileok,"id=$id");
+                update("question","imgpath","'$fileok'","id=$id");
             }
         }
         
@@ -167,44 +186,47 @@
         );
     }
 
-    function getQuestionById($id,$getAnswer=true){
+    function getQuestionById($id,$getAnswer=true,$getUser=true,$getCourse=false){
         $question=getById("Question",$id);
         if($question!=false){
-            if($getAnswer==true){
+            if($getAnswer){
                 $answers=getAnsByQuesId($question["id"]);
                 $question["answer"]=$answers;
             }
-            $user=getUserById($question['user_id']);
-            $question["user"]=$user;
+            if($getUser){
+                $user=getUserById($question['user_id']);
+                $question["user"]=$user;
+            }
+            if($getCourse){
+                $question["course"]=getCourseById($question["course_id"]);
+            }
             return $question;
         }
         return false;
     }
     function getRandomQuestion($limit,$courseId,...$predicate){
         global $conn;
-        $predicate="course_id=$courseId".join(" ",$predicate);
+        $predicate=[...$predicate,"course_id=$courseId"];
+        $predicate=join(" and ",$predicate);
         $query="select id from question where $predicate order by rand() limit $limit";
-        echo $query;
         $arr=Array();
         $result=mysqli_query($conn,$query);
         while($row=mysqli_fetch_assoc($result)){
-            array_push($row,$arr);
-            print_r($row);
-            echo "<br>";
+            array_push($arr,$row);
         }
-        // for($i=0;$i<count($arr);$i++){
-        //     $arr[$i]=getQuestionById($arr[$i]['id']);
-        // }
-        
+        for($i=0;$i<count($arr);$i++){
+            $arr[$i]=getQuestionById($arr[$i]['id'],true,false);
+        }
         return $arr;
     }
-    function getAllQuestionByCourseId($courseId,$user_id=false) {
-        $predicate="course_id=$courseId";
+    function getAllQuestionByCourseId($courseId,$user_id=false,...$predicate) {
+        $predicate=[...$predicate,"course_id=$courseId"];
+        $predicate=join(" and ",$predicate);
         $user=getUserById($user_id);
         if($user['role']!="ADMIN"){
             $predicate=$predicate." and user_id=$user_id";
         }
-        $question=getByPredicate("Question",$predicate);
+        $question=get("Question",$predicate);
         $arr=Array();
         while($row=mysqli_fetch_assoc($question)){
             $answers=getAnsByQuesId($row["id"]);
@@ -226,13 +248,58 @@
         
         deleteById("question",$questionId);
     }
-    function updateQuesionById($id,$content){
-        update("question","content",$content,"id=$id");
+    function updateQuesionById($id,$content,$imgpath=""){
+        update("question","content","'$content'","id=$id");
+        if(strlen(trim($imgpath))!=0){
+            update("question","imgpath","'$imgpath'","id=$id");
+        }
+        
     }
 
     function duyetCauhoi($questionId) {
-        update("question","state","Đã duyệt","id=$questionId");
+        update("question","state","'Đã duyệt'","id=$questionId");
     }
+    // Answer history service
+    function addNewRecord($userId,$questionId){
+        $wrongAnswer=Array(
+            "question_id"=>$questionId,
+            "user_id"=>$userId
+        );
+        $result=get("answer_history","user_id=$userId","question_id=$questionId");
+        if(mysqli_num_rows($result)==0){
+            return insert("answer_history",$wrongAnswer);
+        }else{
+            $y_answer=mysqli_fetch_assoc($result);
+            update("answer_history","wrong_count","wrong_count+1","id= $y_answer[id]");
+        }
+        
+    }
+    function getAllRecord(){
+        $result=get("answer_history");
+        $arr=Array();
+        while($row=mysqli_fetch_assoc($result)){
+            $row['question']=getQuestionById($row['question_id'],false,false,true);
+        }
+    }
+    function getAllRecordByUserId($userId){
+        $result=getPagination("answer_history",["user_id=$userId"],"test_at","ASC",);
+        $arr=Array();
+        while($row=mysqli_fetch_assoc($result)){
+            array_push($arr,$row);
+        }
+        for ($i=0; $i <count($arr) ; $i++) { 
+            $arr[$i]['question']=getQuestionById($arr[$i]["id"]);
+        }
+        return $arr;
+    }
+    function getRecordById($userId,$questionId){
+        $result=get("answer_history","id=$questionId");
+        if($result) return mysqli_fetch_assoc($result);
+        return false;
+    }
+
+
+
 
     ////Utils
     function errorMessage($errMessage){
@@ -267,23 +334,22 @@
         return "<div class='form-group $class'>$children</div>";
     }
     function FormInput($type,$name,$value,...$property){
-        $properties=" class='form-control' "+join(" ",$property);
+        $properties=" class='form-control' ".join(" ",$property);
         return input($type,$name,$value,$properties);
     }
     
     function Question($question,$order=0){
-        $form="";
-        if($order!=0) $form=$form.FormGroup("Câu $order:$question[content]");
+        $form=FormGroup("Câu $order: $question[content]");
         if(isset($question['imgpath'])&&file_exists($question['imgpath'])){
             $form=$form.FormGroup("<img src='$question[imgpath]'/>");
         }
-        $form=$form."<input type='hidden' name='type_$question[id]' value='$question[question_type]'/>";
+        $form=$form."<input type='hidden' name='type_$question[id]' value='$question[question_type]'>";
         return $form;
     }
     function CauHoiDien($question,$order=0){
         $form="<div>";
         $form=$form.Question($question,$order);
-        $form.FormGroup(FormInput("text","ans_$question[id]",""));
+        $form=$form.FormGroup(FormInput("text","ques_$question[id]",""));
         $form=$form."</div>";
         return $form;
     }
@@ -293,10 +359,13 @@
         $ans=join(" ",array_map(function($answer){
             return 
             "<div style='margin: 20px 0 0 0;' class='input-group mb-3'> 
-                ".input("radio","ans_$answer[question_id]",$answer['id']).
-                input("text",$answer['question_id'],$answer['content'])."
+                ".input("radio","ques_$answer[question_id]",$answer['id']).
+                input("text",$answer['question_id'],$answer['content'],"readonly")."
             </div>";
         },$question['answer']));
+        $form=$form.$ans;
+        $form=$form."</div>";
+        return $form;
     }
     function TracNghiemnDa($question,$order){
         $form="<div>";
@@ -304,10 +373,13 @@
         $ans=join(" ",array_map(function($answer){
             return 
             "<div style='margin: 20px 0 0 0;' class='input-group mb-3'> 
-                ".input("checkbox","check_$answer[id]",$answer['id']).
-                input("text",$answer['question_id'],$answer['content'])."
+                ".input("checkbox","ans_$answer[id]",$answer['id']).
+                input("text",$answer['question_id'],$answer['content'],"readonly")."
             </div>";
         },$question['answer']));
+        $form=$form.$ans;
+        $form=$form."</div>";
+        return $form;
     }
 ?>
 

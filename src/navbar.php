@@ -16,6 +16,7 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <li><a class="dropdown-item" href="./dang_nhap.php?action=logout">Đăng xuất</a></li>
+            <li><a class="dropdown-item" href="./lich_su.php">Lịch sử</a></li>
           </ul>
         </li>
       </ul>
