@@ -11,7 +11,12 @@
     const CHUA_DUYET="Chưa duyệt";
     const DA_DUYET="Đã duyệt";
 
-    
+    //Navigate function
+    if(isset($_SERVER['HTTP_REFERER'])){
+        $_SESSION['prepage']=$_SERVER['HTTP_REFERER'];
+    }else{
+        $_SESSION['prepage']="../index.php";
+    }
 
     // Begin Login function
     
@@ -106,7 +111,7 @@
     function getPagination($tablename,$predicate,$orderBy,$order,...$limit){
         global $conn;
         if(count($predicate)!=0)   $predicate=" where ".join(" and ",$predicate);
-        if(count($predicate)!=0)   $orderBy=" where ".join(" , ",$orderBy);
+        if(count($orderBy)!=0)   $orderBy=" order by ".join(" , ",$orderBy);
         if($order=="ASC"||$order=="DESC") $orderBy=$orderBy." $order ";
         if(count($limit)!=0) $limit=" limit ".join(",",$limit);
         $query="Select * from $tablename $predicate $orderBy $limit";
@@ -204,18 +209,19 @@
         }
         return false;
     }
-    function getRandomQuestion($limit,$courseId,...$predicate){
+    function getRandomQuestion($limit,$detail,...$predicate){
         global $conn;
-        $predicate=[...$predicate,"course_id=$courseId"];
         $predicate=join(" and ",$predicate);
         $query="select id from question where $predicate order by rand() limit $limit";
         $arr=Array();
         $result=mysqli_query($conn,$query);
         while($row=mysqli_fetch_assoc($result)){
-            array_push($arr,$row);
+            array_push($arr,$row['id']);
         }
-        for($i=0;$i<count($arr);$i++){
-            $arr[$i]=getQuestionById($arr[$i]['id'],true,false);
+        if($detail){
+            for($i=0;$i<count($arr);$i++){
+                $arr[$i]=getQuestionById($arr[$i],true,false);
+            }
         }
         return $arr;
     }
@@ -259,6 +265,20 @@
     function duyetCauhoi($questionId) {
         update("question","state","'Đã duyệt'","id=$questionId");
     }
+    function createTestQUestionCollection($page,$limit){
+        $result=getPagination("question",["state='".DA_DUYET."'"],['id'],"ASC",$page,$limit);
+        $arr=Array();
+        while($row=mysqli_fetch_assoc($result)){
+            $row=getQuestionById($row['id'],false,false,true);
+            array_push($arr,$row);
+        }
+        return $arr;
+    }
+    
+
+
+
+
     // Answer history service
     function addNewRecord($userId,$questionId){
         $wrongAnswer=Array(
@@ -297,8 +317,94 @@
         if($result) return mysqli_fetch_assoc($result);
         return false;
     }
+    function getRecord($page,$number,$user_id=-1) {
+        $page=$page*5;
+        $predicate=Array();
+        if($user_id!=-1){
+            $predicate=array("user_id=$user_id");
+        }
+        $result=getPagination("answer_history",$predicate,["test_at"],"DESC",$page,5);
+        $arr=Array();
+        while($row=mysqli_fetch_assoc($result)){
+            $row['question']=getQuestionById($row['question_id'],false,false,true);
+            array_push($arr,$row);
+        }
+        return $arr;
+    }
 
 
+    //Test service
+    function insertNewTest($title,$testDesc,$limitTime,$releaseTime,$endTime,$questionIds){
+        $testObject=Array(
+            "title"=>$title,
+            "test_desc"=>$testDesc,
+            "limit_time"=>$limitTime,
+            "release_time"=>$releaseTime,
+            "end_time"=>$endTime
+        );
+        if($id=insert("test",$testObject)){
+            $isValid=true;
+            foreach ($questionIds as $key => $value) {
+                $obj=Array(
+                    "test_id"=>$id,
+                    "question_id"=>$value
+                );
+                $isValid=insert("test_question",$obj);
+            }
+            if(!$isValid) return true;
+        }
+        return false;
+    }
+    function getTestById($testId,$fetchQuestionList=false){
+        $result=get("test","id=$testId");
+        $result=mysqli_fetch_assoc($result);
+        if($fetchQuestionList){
+            $arr=Array();
+            $questionIds=get("test_question","test_id=$testId");
+            while($row=mysqli_fetch_assoc($questionIds)){
+                $question=getQuestionById($row['question_id'],true,false,false);
+                array_push($arr,$question);
+            }
+            $result['questions']=$arr;
+        }
+        return $result;
+    }
+    function getAllTest(){
+        $result=get("test");
+        $arr=Array();
+        while($row=mysqli_fetch_assoc($result)){
+            array_push($arr,$row);
+        }
+        return $arr;
+    }
+
+
+
+    //test history
+    function insertTestRecord($questionAmount,$rightAnswer,$type){
+        $object=Array(
+            "question_number"=>$questionAmount,
+            "answer_number"=>$rightAnswer
+        );
+        return insert("test_history",$object);
+    }
+    function getAllTestRecord($user_id=-1,...$limit){
+        $arr=Array();
+        if($user_id!=-1){
+            $result=getPagination("test_history",["user_id=$user_id"],['test_at'],"DESC",...$limit);
+            while($row=mysqli_fetch_assoc($result)){
+                array_push($arr,$row);
+            }
+        }else{
+            $result=getPagination("test_history",['test_at'],"DESC",...$limit);
+            while($row=mysqli_fetch_assoc($result)){
+                array_push($arr,$row);
+            }
+        }
+        return $arr;
+    }
+
+    
 
 
     ////Utils
@@ -328,6 +434,10 @@
         echo "<pre>";
         print_r($arr);
         echo "</pre>";
+    }
+    //Navigate($link)
+    function navigate($link){
+        header("Location: $link");
     }
     //Render
     function FormGroup($children,$class=""){

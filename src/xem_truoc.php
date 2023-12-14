@@ -68,8 +68,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Xem trước</title>
 	<!-- Begin bootstrap cdn -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+	<link href="../css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+	<script src="../js/bootstrap.bundle.min.js"></script>
 	<!-- End bootstrap cdn -->
     <style>
         .duyet,.chuaduyet{
@@ -107,18 +107,18 @@
 					<!-- <hr> -->
 			
 			<div id="action" style="margin: 20px 0 0 13%;">
-            <p class="h3">Khóa học 
-                <?php
-                    if(isset($_GET["courseId"])){
-                        $query="Select * from course where id=$_GET[courseId]";
-                        $result=mysqli_query($conn,$query);
-                        while($row=mysqli_fetch_assoc($result)){
-                            print_r($row['name']);
-                        }
+            <?php
+                if(isset($_GET["courseId"])){
+                    echo "<p class='h3'>Khóa học ";
+                    $query="Select * from course where id=$_GET[courseId]";
+                    $result=mysqli_query($conn,$query);
+                    while($row=mysqli_fetch_assoc($result)){
+                        echo($row['name']);
                     }
-                ?>
-            </p>
-			<a href="./bien_tap.php<?php echo"?courseId=$_GET[courseId]"?>"  class="btn btn-primary">Trở lại</a>
+                    echo "</p>";
+                }
+            ?>
+			<a href="<?php echo $_SESSION['prepage']; ?>"  class="btn btn-primary">Trở lại</a>
             <form action="" method="POST" enctype="multipart/form-data">
                 <div   style="margin: 20px 30%;">
                     <!-- tên câu hỏi -->

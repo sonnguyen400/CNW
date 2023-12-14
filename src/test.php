@@ -4,7 +4,7 @@
     if(!isLogin()){
         header("Location: "."./dang_nhap.php");
     }
-    $questions=getRandomQuestion(6,$_GET['courseId'],"state='".DA_DUYET."'");
+    $questions=getRandomQuestion(6,true,"state='".DA_DUYET."'","course_id='$_GET[courseId]'");
     $_SESSION['questions']=$questions;
 ?>
 <!DOCTYPE html>

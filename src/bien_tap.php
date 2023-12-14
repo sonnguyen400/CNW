@@ -21,8 +21,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Biên tập</title>
 	<!-- Begin bootstrap cdn -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+	<link href="../css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+	<script src="../js/bootstrap.bundle.min.js"></script>
 	<!-- End bootstrap cdn -->
     <style>
         img{

@@ -1,11 +1,12 @@
-<?php 
+<?php
+
+use function PHPSTORM_META\elementType;
+
     include '../function.php'; 
     include '../connectdb.php';
     if(!isLogin()){
         header("Location: "."./dang_nhap.php");
     }
-    
-    
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,8 +15,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Biên tập</title>
 	<!-- Begin bootstrap cdn -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+	<link href="../css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+	<script src="../js/bootstrap.bundle.min.js"></script>
 	<!-- End bootstrap cdn -->
     <style>
         
@@ -102,15 +103,18 @@
                                 }
                             },0);
                             $question_amount=count($questions);
+                            if(isset($_GET["courseId"])){
+                                $type=getCourseById($_GET["courseId"])['name'];
+                            }else if(isset($_GET['testId'])){
+                                $type=getTestById($_GET['testId'])['test_type'];
+                            }
+                            insertTestRecord($question_amount,$score,$type);
                             echo "
                                 <h1>".round(($score*1.0/$question_amount)*10.0,2)."</h1>
                                 <h6>Làm được $score/$question_amount câu </h6>
                             ";
                         }
-                        
                     ?>
-                    
-                    <h6>Chiến thắng % người cùng làm bài</h6>
                 </div>
                 <a class="btn btn-success exit_btn" href="./khoa_hoc.php">Thoát</a>
             </div>

@@ -9448,3 +9448,18 @@ fieldset:disabled .btn {
   }
 }
 /*# sourceMappingURL=bootstrap.min.css.map */
+.bubble{
+    border-radius: 20px;
+    color:#fff;
+}
+.bubble.success{
+    background-color: #508D69;
+    
+}
+.bubble.error{
+    background-color: #FF6969;
+}
+.remain-line{
+    background-color: red;
+    height: 10px;
+}
