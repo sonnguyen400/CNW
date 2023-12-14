@@ -1,9 +1,12 @@
 <?php
     include '../function.php';
-    If(isset($_POST['submitLogin'])){
+    if(isset($_POST['submitLogin'])){
         if(checkLogin($_POST['username'],$_POST['password'])){
             header("Location:"."../index.php");
         }
+    }
+    if(isset($_GET['action'])=='logout'){
+        session_unset();
     }
 ?>
 <!DOCTYPE html>

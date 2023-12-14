@@ -4,10 +4,11 @@
     if(!isLogin()){
         header("Location: ./dang_nhap.php");
     }
-    $editMode=isset($_POST["edit"]);
     if(isset($_GET["quesId"])){
         $question=getQuestionById($_GET["quesId"]);
     }
+    $editMode=isset($_POST["edit"]);
+    
     if(isset($_POST['xoaanh'])){
         $editMode=true;
         $question['imgpath']="";
@@ -106,18 +107,18 @@
 	<main style="min-height: 100vh; max-width: 100%;">
 					<!-- <hr> -->
 			
-			<div id="action" style="margin: 20px 0 0 13%;">
-            <?php
-                if(isset($_GET["courseId"])){
-                    echo "<p class='h3'>Khóa học ";
-                    $query="Select * from course where id=$_GET[courseId]";
-                    $result=mysqli_query($conn,$query);
-                    while($row=mysqli_fetch_assoc($result)){
-                        echo($row['name']);
+		<div id="action" style="margin: 20px 0 0 13%;">
+            <p class="h3">
+                <!--Tên khóa học  -->
+                Khóa học: 
+                <?php
+                    if(isset($_GET["courseId"])){
+                        $course=getCourseById($_GET["courseId"]);
+                        print_r($course['name']);
                     }
-                    echo "</p>";
-                }
-            ?>
+                ?>
+                
+            </p>
 			<a href="<?php echo $_SESSION['prepage']; ?>"  class="btn btn-primary">Trở lại</a>
             <form action="" method="POST" enctype="multipart/form-data">
                 <div   style="margin: 20px 30%;">
@@ -151,10 +152,12 @@
                 
                     <div style='margin: 20px 0 0 0;' class='input-group mb-3'>
                         <?php
+                            $showRightAnswer= ($question['user_id']==$_SESSION['userid']||$_SESSION['role']==ADMIN);
                             if($question['question_type']==CAUHOI_DIEN){
                                 echo input('text','da',$question['answer'][0]['content'],'class="form-control"',$editMode?"":"readonly");
                             }else if($question['question_type']==TRAC_NGHIEM_1DA||$question['question_type']==TRAC_NGHIEM_nDA){
                                 foreach ($question['answer'] as $key => $answer) {
+                                    
                                     echo "<div style='margin: 20px 0 0 0;' class='input-group mb-3'> ";
                                     if($editMode){
                                         echo input($question['question_type']==TRAC_NGHIEM_1DA?"radio":"checkbox",
@@ -162,7 +165,7 @@
                                                 "$key",
                                                 $answer['isTrue']?"checked":"");
                                     }
-                                    echo input('text',"da$key",$answer['content'],'class="form-control"',$editMode?"":"readonly",$answer['isTrue']?"style='border:2px solid green'":"");
+                                    echo input('text',"da$key",$answer['content'],'class="form-control"',$editMode?"":"readonly",$answer['isTrue']&&$showRightAnswer?"style='border:2px solid green'":"");
                                     echo "</div>";
                                 }
                             }
@@ -185,7 +188,7 @@
                     ?>
                 </div>
             </form>
-		
+		</div>
 	</main>
 
     <?php include 'footer.php'; ?>

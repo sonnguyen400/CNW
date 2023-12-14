@@ -4,6 +4,9 @@
     if(!isLogin()){
         header("Location: "."./dang_nhap.php");
     }
+    if(isset($_POST['delete'])){
+        deleteTestById($_POST['delete']);
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,21 +20,17 @@
 </head>
 <body>
 	<?php include 'navbar.php';?>
-	<main style="min-height: 100vh; width: 100%;">
+	<main style="min-height: 100vh; width:100%;">
 		<?php
             $tests=getAllTest();
         ?>
-		<ul  class="list-group">
-            <li  class="list-group-item  d-flex flex-column w-100 justify-content-between">
-                <div class="d-flex flex-column">
-                    <h3>Title</h3>
-                    <small class="disabled">Description</small>
-                </div>
-                <div>
-                    <div class="remain-line"></div>
-                </div>
-
-            </li>
+		<ul  class="list-group" style="max-width: 1200px;margin:20px auto">
+            <?php
+                $tests=getAllTest();
+                foreach ($tests as $key => $test) {
+                    echo testItem($test);
+                }
+            ?>
         </ul>
 	</main>
 	<?php include 'footer.php'; ?>

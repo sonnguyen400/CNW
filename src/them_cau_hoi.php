@@ -26,13 +26,7 @@
             <p class="h3">Khóa học 
                 <!-- tên khóa học -->
                 <?php
-                    if(isset($_GET["courseId"])){
-                        $query="Select * from course where id=$_GET[courseId]";
-                        $result=mysqli_query($conn,$query);
-                        while($row=mysqli_fetch_assoc($result)){
-                            print_r($row['name']);
-                        }
-                    }
+                    echo getCourseById($_GET["courseId"])['name'];
                 ?>
             </p>
 			<a href="./bien_tap.php<?php echo"?courseId=$_GET[courseId]"?>" class="btn btn-primary">Trở lại</a>

@@ -28,9 +28,8 @@
         <!-- begin khóa học -->
 		<div class="row row-cols-1 row-cols-md-3 g-4" style="margin: 0 auto; width: 80%;">
         <?php 
-            $query="select * from `Course`";
-            $result=mysqli_query($conn,$query);
-            while($row=mysqli_fetch_assoc($result)){
+            $courses=getAllCourse();
+            foreach ($courses as $key => $row) {
                 echo "  <div class='col'>
                             <div class='card'>
                                 <img src='$row[imgpath]' class='card-img-top' alt='Course Image'>
@@ -43,13 +42,11 @@
                         </div>";
             }
         ?>
-		<!-- end khóa học -->
 			
 
 		</div>
 	</main>
 	<?php include 'footer.php'; ?>
-    <!-- <a class='btn btn-primary' href='./test.php?courseId=$row[id]'>Kiểm tra</a> -->
 </body>
 
 	

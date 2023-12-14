@@ -68,6 +68,11 @@
                 
             </p>
             <a href="./khoa_hoc.php" class="btn btn-primary">Trở lại</a>
+            <?php
+                if($_SESSION['role']==ADMIN){
+                    echo "<a href='./testanalytics.php?courseId=$course[id]' class='btn btn-primary'>Thống kê điểm số</a>";
+                }
+            ?>
            
             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                 Thêm câu hỏi

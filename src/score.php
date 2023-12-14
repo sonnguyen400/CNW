@@ -65,6 +65,7 @@ use function PHPSTORM_META\elementType;
                     <?php
                         if(isset($_POST['submit'])){
                             $questions=$_SESSION['questions'];
+
                             $score=array_reduce($questions,function($pre,$question){
                                 $id=$question['id'];
                                 if($question['question_type']==CAUHOI_DIEN){
@@ -102,17 +103,20 @@ use function PHPSTORM_META\elementType;
                                     }else return $pre+0;
                                 }
                             },0);
+
                             $question_amount=count($questions);
-                            if(isset($_GET["courseId"])){
-                                $type=getCourseById($_GET["courseId"])['name'];
-                            }else if(isset($_GET['testId'])){
-                                $type=getTestById($_GET['testId'])['test_type'];
-                            }
-                            insertTestRecord($question_amount,$score,$type);
                             echo "
                                 <h1>".round(($score*1.0/$question_amount)*10.0,2)."</h1>
-                                <h6>Làm được $score/$question_amount câu </h6>
+                                <h6>Làm đúng $score/$question_amount câu </h6>
                             ";
+
+                            $type="";
+                            if(isset($_GET["courseId"])){
+                                insertTestRecord($question_amount,$score,$_GET["courseId"],null);
+                            }else if(isset($_GET['testId'])){
+                                insertTestRecord($question_amount,$score,null,$_GET["testId"]);
+                            }
+                            
                         }
                     ?>
                 </div>

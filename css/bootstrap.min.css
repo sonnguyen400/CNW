@@ -9451,15 +9451,41 @@ fieldset:disabled .btn {
 .bubble{
     border-radius: 20px;
     color:#fff;
+    padding:2px 12px;
 }
 .bubble.success{
     background-color: #508D69;
     
 }
+.bubble~.bubble{
+    margin-left: 10px;
+}
 .bubble.error{
     background-color: #FF6969;
 }
 .remain-line{
+    margin:0px -16px -12px -16px;
+    height: 3px;
+    position: relative;
     background-color: red;
-    height: 10px;
+}
+.test-item{
+    overflow: hidden;
+    margin:10px 0px;
+}
+.test_action{
+    margin-top: 20px;
+}
+.test_action .btn{
+    margin: 0px 10px;
+}
+button[disabled]{
+    pointer-events: none;
+    opacity: 0.4;
+}
+.warn-message{
+    color: red;
+}
+.desc-message{
+    opacity: 0.7;
 }

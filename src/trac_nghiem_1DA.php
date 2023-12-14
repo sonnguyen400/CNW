@@ -27,13 +27,7 @@
             <p class="h3">Khóa học 
                 <!-- tên khóa học -->
                 <?php
-                    if(isset($_GET["courseId"])){
-                        $query="Select * from course where id=$_GET[courseId]";
-                        $result=mysqli_query($conn,$query);
-                        while($row=mysqli_fetch_assoc($result)){
-                            print_r($row['name']);
-                        }
-                    }
+                    echo getCourseById($_GET["courseId"])['name'];
                 ?>
             </p>
 			<a href="./bien_tap.php<?php echo"?courseId=$_GET[courseId]"?>" class="btn btn-primary">Trở lại</a>
@@ -42,7 +36,14 @@
             <div style="margin: 20px 13%;">
                 <div class="form-group">
                     <label for="name_quiz"><span style="color: red;">*</span>Nhập tên câu hỏi</label>
-                    <input class="form-control"  type="text" value="<?php if((isset($_POST["btn"])||isset($_POST["createDa"]))&&isset($_POST["ten_cau_hoi"])){ echo $_POST["ten_cau_hoi"];}?>" name="ten_cau_hoi" id="">
+                    <input class="form-control"  type="text" value="<?php if(isset($_POST["ten_cau_hoi"])){ echo $_POST["ten_cau_hoi"];}?>" name="ten_cau_hoi" id="">
+                    <small>
+                        <?php
+                            if(isset($_POST["ten_cau hoi"])&&trim($_POST["ten_cau hoi"])==""){
+                                echo "Không thể bỏ trống";
+                            }
+                        ?>
+                    </small>
                 </div>
                 <div class="form-group">
                     <label for="name_quiz">Ảnh cho câu hỏi</label>
@@ -54,7 +55,7 @@
                 </div>
                 <div class="form-group">
                     <label for="name_quiz"><span style="color: red;">*</span>Nhập số lượng đáp án</label>
-                    <input class="form-control"  type="number" min='4' max='10' value="<?php if(isset($_POST["createDa"])&&isset($_POST["cautralois"])){ echo $_POST["cautralois"]<4?4:$_POST["cautralois"];}else echo 4?>" name="cautralois" id="">
+                    <input class="form-control"  type="number" min='4' max='10' value="<?php if(isset($_POST["cautralois"])){ echo $_POST["cautralois"]<4?4:$_POST["cautralois"];}else echo 4?>" name="cautralois" id="">
                         <button name="createDa" class="btn-primary btn" style="margin-top: 10px">Tạo đáp án</button>
                 </div>
                 <?php
@@ -66,7 +67,7 @@
                     for($i=0;$i<$defaultValue;$i++){
                         $isChecked=isset($_POST["check"])&&$_POST["check"]==$i?"checked":"";
                         $validField=true;
-                        if(isset($_POST["da$i"])&&trim($_POST["da$i"])==""){
+                        if(isset($_POST["btn"])&&isset($_POST["da$i"])&&trim($_POST["da$i"])==""){
                             $isValid=$validField=false;
                         }
                         echo "<div style='margin: 20px 0 0 0;' class='input-group mb-3'>   

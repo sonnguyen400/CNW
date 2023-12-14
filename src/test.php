@@ -4,8 +4,18 @@
     if(!isLogin()){
         header("Location: "."./dang_nhap.php");
     }
-    $questions=getRandomQuestion(6,true,"state='".DA_DUYET."'","course_id='$_GET[courseId]'");
+    $questions=Array();
+    if(isset($_GET['courseId'])){
+        $questions=getRandomQuestion(6,true,"state='".DA_DUYET."'","course_id='$_GET[courseId]'");
+    }
+    if(isset($_GET['testId'])){
+        $test=getTestById($_GET['testId'],true);
+        $questions=$test['questions'];
+    }
     $_SESSION['questions']=$questions;
+    if(count($questions)<5){
+        echo errorMessage("Bài kiểm tra chưa sẵn sàng");
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,29 +56,44 @@
     <?php 
         include 'navbar.php';
     ?>
-	<main style="min-height: 100vh; max-width: 100%;">
-			
+	<main style="min-height: 100vh; max-width: 1200px;">
         <div id="action" style="margin: 20px 0 0 13%;">
-            <form action="./score.php<?php echo "?courseId=$_GET[courseId]"?>" method="post">
-                <?php
-                    foreach ($questions as $key => $question) {
-                        switch ($question['question_type']) {
-                            case CAUHOI_DIEN:
-                                echo CauHoiDien($question,$key+1);
-                                break;
-                            case TRAC_NGHIEM_1DA:
-                                echo TracNghiem1Da($question,$key+1);
-                                break;
-                            case TRAC_NGHIEM_nDA:
-                                echo TracNghiemnDa($question,$key+1);
-                                break;
-                            default:
-                                break;
+            <?php
+                if(isset($_GET['courseId'])){
+                    $course=getCourseById($_GET['courseId']);
+                    echo "<h2>Khóa học  $course[name]</h2>";
+                }else if(isset($GET['testId'])){
+                    echo "<h2>$test[title]</h2>";
+                }
+            ?>
+            <div style="max-width: 800px;margin:40px auto">
+                <form action="./score.php?<?php echo isset($_GET['courseId'])?"courseId=$_GET[courseId]":"testId=$_GET[testId]";?>" method="post">
+                    <?php
+                        foreach ($questions as $key => $question) {
+                            switch ($question['question_type']) {
+                                case CAUHOI_DIEN:
+                                    echo CauHoiDien($question,$key+1);
+                                    break;
+                                case TRAC_NGHIEM_1DA:
+                                    echo TracNghiem1Da($question,$key+1);
+                                    break;
+                                case TRAC_NGHIEM_nDA:
+                                    echo TracNghiemnDa($question,$key+1);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
-                    }
-                ?>
-                <button type="submit" name="submit" value="submit" class="btn btn-success">Gửi</button>
-            </form>
+                        if(count($questions)<5){
+                            echo "<a class='btn btn-success' href='$_SESSION[prepage]'>Quay lại</a>";
+                        }else{
+                            echo "<button type='submit' name='submit' value='submit' class='btn btn-success'>Gửi</button>";
+                        }
+                    ?>
+                    
+                    
+                </form>
+            </div>
            
         </div>
 	</main>
